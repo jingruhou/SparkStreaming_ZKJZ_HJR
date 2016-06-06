@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="zkjz:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/zkjz_jar</output-path>
+    <root id="archive" name="SparkStreaming_ZKJZ.jar">
+      <element id="module-output" name="SparkStreaming_ZKJZ" />
+    </root>
+  </artifact>
+</component>

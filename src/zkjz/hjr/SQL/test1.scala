@@ -31,7 +31,6 @@ object test1 {
     val result = pairs.reduceByKey((a,b) => a+b)
     result.foreach(println)
 
-
     //关闭sc
     sc.stop()
   }

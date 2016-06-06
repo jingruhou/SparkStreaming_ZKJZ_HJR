@@ -1,10 +1,11 @@
 package zkjz.hjr.SQL
 
 import org.apache.spark.{SparkContext, SparkConf}
+
 /**
   * Created by Administrator on 2016/6/6.
   */
-object zkjz4 {
+object zkjz5 {
   def main(args:Array[String]): Unit ={
     //初始化配置
     val conf = new SparkConf().setAppName("ZKJZ_SQL")
@@ -13,7 +14,8 @@ object zkjz4 {
     //加载文件
     val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
     val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/p*")
-
+    //val outclinical_diago_rdd = sc.textFile("D://streamingData//sql//outclinical_diago530.txt")
+    //val outclinical_words_rdd = sc.textFile("D://streamingData//sql//outclinical_words.txt")
     //将词库表转化为数组
     val counts_word = outclinical_words_rdd.toArray()
 
@@ -29,13 +31,9 @@ object zkjz4 {
     }
     //println("#######################SUCCESSFUL######################################")
     //处理门诊表的业务逻辑
-    var count = 0
-    var pcount = 0
     val outclinical = outclinical_diago_rdd.map(line =>{
-       var strs = line.split("\t")
-      pcount=pcount+1
-      if(strs.length==4){
-        count=count+1
+      var strs = line.split("\t")
+        println(line)
         var l = strs(3)
         var s = strs(0) + "\t" + strs(1) + "\t" + strs(2) + "\t"
         var m = l.length
@@ -44,7 +42,7 @@ object zkjz4 {
           while (j < l.length() - m + 1) {
             var s3 = l.substring(j, j + m)
             if (map.contains(s3)) {
-              s += map(s3) + "  "
+              s += map(s3) + "."
               l = l.replace(s3, "")
             }
             j = j + 1
@@ -52,14 +50,11 @@ object zkjz4 {
           m = m - 1
         }
         s
-      }
 
-        //println(line)
+      //println(line)
     })
-    println("##########################"+pcount)
-    println("###############==4########"+count)
     //写入hdfs
-    outclinical
+    //outclinical.repartition(1).saveAsTextFile("D://streamingData//sql//test")
     outclinical.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
     //关服务
     sc.stop()

@@ -12,7 +12,7 @@ object zkjz5 {
     val sc = new SparkContext(conf)
 
     //加载文件
-   // val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
+    //val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
     //val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/p*")
    val outclinical_diago_rdd = sc.textFile("D://streamingData//sql//outclinical_diago530.txt")
     val outclinical_words_rdd = sc.textFile("D://streamingData//sql//outclinical_words.txt")
@@ -31,17 +31,24 @@ object zkjz5 {
     }
     //处理门诊表的业务逻辑
     val outclinical = outclinical_diago_rdd.map(line =>{
+      var newline=""
+      if(line.contains("")){
+        newline = line.replace("","aaa")
+      }
       var strs = line.split("\t")
-      var s = ""
-      if(strs.length==4){
         var l = strs(3)
-        s = strs(0) + "\t" + strs(1) + "\t" + strs(2) + "\t"
+        var s = strs(0) + "\t" + strs(1) + "\t" + strs(2)+"\t"
         var m = l.length
         while (m >= 1) {
           var j = 0
+          //var count = 0
           while (j < l.length() - m + 1) {
             var s3 = l.substring(j, j + m)
             if (map.contains(s3)) {
+              //if(count==0){
+                //s = strs(0) + "\t" + strs(1) + "\t" + strs(2)+"\t"
+                //count = count+1
+              //}
               s += map(s3) + "  "
               l = l.replace(s3, "")
             }
@@ -49,14 +56,15 @@ object zkjz5 {
           }
           m = m - 1
         }
-      }
         s
     })
-
+    outclinical.foreach(println)
     //ReduceByKey过程
-    //R-（2）使用第一MPI_PERSION_ID和第二个VISITOR_DATE字段作为key
+    //R-（2）使用第一MPI_PERSION_ID和第二个VISITOR_DATE字段作为key//rdd1.map(_.split("\t")).filter(_.length==6)
     val pairs = outclinical.map(line => {
       var col2 = line.split("\t")
+      println(line)
+      println(col2.length)
       (col2(1)+"\t"+col2(2),col2(3))
     })
 
@@ -65,11 +73,9 @@ object zkjz5 {
     val result = pairs.reduceByKey((a,b) => a+b).map(line =>{
       line._1 +"\t"+ line._2
     })
-
     result.foreach(println)
     //写入hdfs
-   // result.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
-
+   //result.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
     //关服务
     sc.stop()
   }

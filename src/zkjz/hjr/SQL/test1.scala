@@ -9,29 +9,40 @@ import org.apache.spark.{SparkContext, SparkConf}
 object test1 {
   def main(args: Array[String]): Unit = {
     //初始化配置
-    val conf = new SparkConf().setAppName("ZKJZ_SQL").setMaster("local[*]")
+    val conf = new SparkConf().setAppName("ZKJZ_SQL")//.setMaster("local[*]")
     val sc = new SparkContext(conf)
+    val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
+    //val outclinical_diago_rdd = sc.textFile("D://streamingData//sql//outclinical_diago530.txt")
+    //val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/p*")
+    val rdd1 = outclinical_diago_rdd.map(_.split("\001")).filter(_.length==4)
+        println("##############################==4##############"+rdd1.count())
+    val rdd2 = outclinical_diago_rdd.map(_.split("\001")).filter(_.length!=4)
+        println("##############################!=4#############"+rdd2.count())
+//    val outclinical = outclinical_diago_rdd.map(line =>{
+//      var strs = line.split("\t")
+//
+//      if(strs.length!=4){
+//      println(line)
+//
+//      }
+//
+//    })
 
-    val outclinical_diago_rdd = sc.textFile("D://streamingData//sql//outclinical_diago530.txt")
-    //（1）过滤掉第一列
-    val pairsRdd = outclinical_diago_rdd.map(line =>{
-      val col1 = line.split("\t")
-      col1(1) +"\t"+ col1(2) +"\t"+ col1(3)
-    })
-    pairsRdd.foreach(println)
+    //outclinical.repartition(1)saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/fasle")
 
-    //（2）使用第一MPI_PERSION_ID和第二个VISITOR_DATE字段作为key
-    val pairs = outclinical_diago_rdd.map(line => {
-      val col2 = line.split("\t")
-      (col2(1)+col2(2),col2(3))
-    })
-    pairs.foreach(println)
+    /*//搜索结果排名第1，但是点击次序排在第2的数据有多少?
 
-    //（3）reduceByKey过程 val counts = pairs.reduceByKey((a, b) => a + b)
-    val result = pairs.reduceByKey((a,b) => a+b)
-    result.foreach(println)
+    val rdd1 = sc.textFile("hdfs://hadoop1:8000/dataguru/data/SogouQ1.txt")
 
-    //关闭sc
-    sc.stop()
+    val rdd2=rdd1.map(_.split("\t")).filter(_.length!=4)
+
+    rdd2.count()
+
+    val rdd3=rdd2.filter(_(3).toInt==1).filter(_(4).toInt==2)
+
+    rdd3.count()
+
+    rdd3.toDebugString*/
+
   }
 }

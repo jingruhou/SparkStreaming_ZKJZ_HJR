@@ -3,17 +3,19 @@ package zkjz.hjr.SQL
 import org.apache.spark.{SparkContext, SparkConf}
 
 /**
-  * Created by Administrator on 2016/6/7.
+  * Created by Administrator on 2016/6/15.
   */
-object zkjz6 {
+object test8341 {
   def main(args:Array[String]): Unit ={
     //初始化配置
-    val conf = new SparkConf().setAppName("zkjz_hjr")
+    val conf = new SparkConf().setAppName("zkjz_hjr").setMaster("local")
     val sc = new SparkContext(conf)
 
     //加载文件
-    val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
-    val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/p*")
+    //val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
+    //val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/p*")
+    val outclinical_diago_rdd = sc.textFile("D:/streamingData/sql/outclinical_diago530.txt")
+    val outclinical_words_rdd = sc.textFile("D:/streamingData/sql/outclinical_words.txt")
 
     //将词库表转化为数组
     val counts_word = outclinical_words_rdd.toArray()
@@ -61,7 +63,8 @@ object zkjz6 {
       line._1 +"\001"+ line._2
     })
     //写入hdfs
-    result.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
+    //result.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
+    result.repartition(1).saveAsTextFile("D:/streamingData/sql")
     //关服务
     sc.stop()
   }

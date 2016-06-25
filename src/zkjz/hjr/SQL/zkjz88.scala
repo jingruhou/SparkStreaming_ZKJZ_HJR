@@ -3,9 +3,9 @@ package zkjz.hjr.SQL
 import org.apache.spark.{SparkContext, SparkConf}
 
 /**
-  * Created by Administrator on 2016/6/7.
+  * Created by Administrator on 2016/6/25.
   */
-object zkjz6 {
+object zkjz88 {
   def main(args:Array[String]): Unit ={
     //初始化配置
     val conf = new SparkConf().setAppName("zkjz_hjr")
@@ -80,8 +80,20 @@ object zkjz6 {
     }).zip(column3RDD).map(line => line._1 +"\t"+ line._2)
     //zipResult.foreach(println)
 
+    val codes = zipResult.map(line => {
+      var newline = line.split("\t")
+      var firstline = newline(0)+"\t"+newline(1)+"\t"
+      var codeline = newline(2).split(",")
+
+      var lastline = ""
+      for(i <- 0 to codeline.length-1){
+        lastline += firstline+codeline(i)+"\n"
+      }
+      lastline
+    })
+
     //写入hdfs
-    zipResult.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
+    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
     //关服务
     sc.stop()
   }

@@ -30,6 +30,5 @@ object StreamingLinearRegression {
 
     ssc.start()
     ssc.awaitTermination()
-
   }
 }

@@ -14,7 +14,7 @@ object split {
     val codes = data.map(line => {
       var newline = line.split("\t")
       var firstline = newline(0)+"\t"+newline(1)+"\t"
-      var codeline = newline(2).split(" ")
+      var codeline = newline(2).split(",")
 
       var lastline = ""
       for(i <- 0 to codeline.length-1){

@@ -45,7 +45,7 @@ object zkjz6 {
           if (map.contains(s3)) {
             //s=s.replace(s3,map(s3)+" ")
             lastline += map(s3)+","
-            l = l.replace(s3, "");
+            l = l.replace(s3, "")
           }
           j = j + 1
         }

@@ -3,9 +3,9 @@ package zkjz.hjr.SQL
 import org.apache.spark.{SparkContext, SparkConf}
 
 /**
-  * Created by Administrator on 2016/6/25.
+  * Created by Administrator on 2016/6/28.
   */
-object zkjz88 {
+object spark0 {
   def main(args:Array[String]): Unit ={
     //初始化配置
     val conf = new SparkConf().setAppName("zkjz_hjr")
@@ -14,6 +14,10 @@ object zkjz88 {
     //加载文件
     val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
     val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/words")
+
+    //所有数据的行数
+    println("***********就诊RDD的所有行数(10731023)：*****"+outclinical_diago_rdd.count()+"****************")
+    println("***********词库RDD的所有行数(92141)：*****"+outclinical_words_rdd.count()+"****************")
 
     //将词库表转化为数组
     val counts_word = outclinical_words_rdd.toArray()
@@ -53,15 +57,29 @@ object zkjz88 {
       }
       firstline+lastline
     })
+    //显示ReduceByKey之前的数据行数
+    println("********ReduceByKey之前的数据行数(10730930)： *********"+outclinical.count()+"***************************")
+    //ReduceByKey过程
+    println("************ReduceByKey的采样数据：****************************")
+    outclinical.take(100).foreach(println)
 
-    ////ReduceByKey过程
+    //打印所有没有四个字段的数据
+    println("****************采样没有四个字段的数据********************************")
+    val bugData = outclinical.filter(_.split("\001").length != 4)
+    bugData.take(100).foreach(println)
+    println("********有问题的数据（没有四个字段的数据）的行数：*******"+bugData.count()+"**************")
+
     val pairs = outclinical.filter(_.split("\001").length == 4).map(line => {
-
-     // if(line.split("\001").length == 4) {
-        val col2 = line.split("\001")
-        (col2(1) + "\001" + col2(2), col2(3))
-      //}
+      var col2 = line.split("\001")
+      (col2(1)+"\001"+col2(2),col2(3))
     })
+
+    println("****************构造的键值对RDD的采样：*********************")
+    pairs.take(50).foreach(println)
+
+    //显示构造的键值对RDD（pairs）的行数：
+    println("*********构造的键值对RDD的行数(10490221)(减少了：240709 条数据)：*********"+pairs.count()+"************************************")
+
 
     //R-（3）reduceByKey过程 val counts = pairs.reduceByKey((a, b) => a + b)
     val result = pairs.reduceByKey((a,b) => a+b).map(line =>{
@@ -83,20 +101,8 @@ object zkjz88 {
     }).zip(column3RDD).map(line => line._1 +"\t"+ line._2)
     //zipResult.foreach(println)
 
-    val codes = zipResult.map(line => {
-      var newline = line.split("\t")
-      var firstline = newline(0)+"\t"+newline(1)+"\t"
-      var codeline = newline(2).split(",")
-
-      var lastline = ""
-      for(i <- 0 to codeline.length-1){
-        lastline += firstline+codeline(i)+"\n"
-      }
-      lastline
-    }).filter(_.split("\n")!=null)
-
     //写入hdfs
-    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")
+    zipResult.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/zkjz/results")
     //关服务
     sc.stop()
   }

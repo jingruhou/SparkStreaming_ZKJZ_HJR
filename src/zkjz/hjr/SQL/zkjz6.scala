@@ -55,7 +55,7 @@ object zkjz6 {
     })
 
     //ReduceByKey过程
-    val pairs = outclinical.map(line => {
+    val pairs = outclinical.filter(_.split("\001").length == 4).map(line => {
       var col2 = line.split("\001")
       (col2(1)+"\001"+col2(2),col2(3))
     })
@@ -81,7 +81,7 @@ object zkjz6 {
     //zipResult.foreach(println)
 
     //写入hdfs
-    zipResult.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
+    zipResult.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr0/results")
     //关服务
     sc.stop()
   }

@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: zkjz.hjr.SQL.zkjz88
+Main-Class: zkjz.hjr.SQL.zkjz6
 

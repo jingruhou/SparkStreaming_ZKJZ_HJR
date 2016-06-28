@@ -93,7 +93,7 @@ object zkjz88 {
         lastline += firstline+codeline(i)+"\n"
       }
       lastline
-    })
+    }).filter(!_.toString.equals("\n") )
 
     //写入hdfs
     codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")

@@ -45,7 +45,7 @@ object zkjz88 {
           if (map.contains(s3)) {
             //s=s.replace(s3,map(s3)+" ")
             lastline += map(s3)+","
-            l = l.replace(s3, "");
+            l = l.replace(s3, "")
           }
           j = j + 1
         }
@@ -54,10 +54,13 @@ object zkjz88 {
       firstline+lastline
     })
 
-    //ReduceByKey过程
-    val pairs = outclinical.map(line => {
-      var col2 = line.split("\001")
-      (col2(1)+"\001"+col2(2),col2(3))
+    ////ReduceByKey过程
+    val pairs = outclinical.filter(_.split("\001").length == 4).map(line => {
+
+     // if(line.split("\001").length == 4) {
+        val col2 = line.split("\001")
+        (col2(1) + "\001" + col2(2), col2(3))
+      //}
     })
 
     //R-（3）reduceByKey过程 val counts = pairs.reduceByKey((a, b) => a + b)
@@ -93,7 +96,7 @@ object zkjz88 {
     })
 
     //写入hdfs
-    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/test/results")
+    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")
     //关服务
     sc.stop()
   }

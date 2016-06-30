@@ -96,7 +96,7 @@ object spark1 {
     })
 
     //写入hdfs
-    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")
+    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results_splitnull")
     //关服务
     sc.stop()
   }

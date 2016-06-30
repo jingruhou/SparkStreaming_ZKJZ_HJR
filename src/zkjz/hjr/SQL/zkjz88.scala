@@ -21,7 +21,7 @@ object zkjz88 {
     //将转化为数组的词库表放入集合中
     var diag = ""
     var words =""
-    var map = Map(diag -> words)
+    var map = Map(diag -> words)//(0)将词库表转化为一个Map（门诊诊断->ICD_CODE）
     for(i <- 0 to counts_word.length-1){
       var line = counts_word(i)
       diag = line.split("\t")(0)
@@ -30,14 +30,16 @@ object zkjz88 {
     }
     //处理门诊表的业务逻辑
     val outclinical = outclinical_diago_rdd.filter(_.split("\001").length == 4).map(line =>{
-
+      /**
+        * 处理门诊表的每一行数据
+        */
       var strs = line.split("\001")
-      var l = strs(3)
-      var firstline = strs(0)+"\001"+strs(1)+"\001"+strs(2)+"\001"
+      var l = strs(3)//(门诊表业务逻辑---1)拿出第四个字段（DIAG_NAME）
+      var firstline = strs(0)+"\001"+strs(1)+"\001"+strs(2)+"\001"//（门诊表业务逻辑---2）拿出前三个字段
       var lastline = ""
       var s = line
-      var m = l.length
-      while (m >= 1) {
+      var m = l.length//（门诊表业务逻辑--3）拿出第四个字段的长度
+      while (m >= 1) {//诊断名不能为空（DIAG_NAME的长度必须>=1）
         var j = 0
 
         while (j < l.length - m + 1) {
@@ -54,7 +56,9 @@ object zkjz88 {
       firstline+lastline
     })
 
-    ////ReduceByKey过程
+    /**
+      * ReduceByKey过程
+      */
     val pairs = outclinical.filter(_.split("\001").length == 4).map(line => {
 
      // if(line.split("\001").length == 4) {
@@ -63,7 +67,7 @@ object zkjz88 {
       //}
     })
 
-    //R-（3）reduceByKey过程 val counts = pairs.reduceByKey((a, b) => a + b)
+    //reduceByKey过程举例： val counts = pairs.reduceByKey((a, b) => a + b)
     val result = pairs.reduceByKey((a,b) => a+b).map(line =>{
       line._1 +"\001"+ line._2
     })

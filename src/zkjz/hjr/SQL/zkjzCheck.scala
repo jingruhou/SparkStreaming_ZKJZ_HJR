@@ -13,7 +13,7 @@ object zkjzCheck {
 
     //加载文件
     val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
-    val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/words")
+    val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/words0.csv")
 
     //将词库表转化为数组
     val counts_word = outclinical_words_rdd.toArray()
@@ -24,9 +24,10 @@ object zkjzCheck {
     var map = Map(diag -> words)//(0)将词库表转化为一个Map（门诊诊断->ICD_CODE）
     for(i <- 0 to counts_word.length-1){
       var line = counts_word(i)
-      diag = line.split("\t")(0)
-      words = line.split("\t")(1)
-      map += (diag -> words)
+
+        diag = line.split("\t")(0)
+        words = line.split("\t")(1)
+        map += (diag -> words)
     }
     //处理门诊表的业务逻辑
     val outclinical = outclinical_diago_rdd.filter(_.split("\001").length == 4).map(line =>{
@@ -49,8 +50,9 @@ object zkjzCheck {
         }
         m = m - 1
       }
-      firstline+lastline
+      //firstline+lastline
       //数据校验
+      line+"\001"+lastline
     })
     //结果校验
     /**
@@ -97,7 +99,8 @@ object zkjzCheck {
     }).filter(_.split("\n")!=null)
 
     //写入hdfs
-    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")
+    //codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")
+    outclinical.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/zkjz_checkResults")
     //关服务
     sc.stop()
   }

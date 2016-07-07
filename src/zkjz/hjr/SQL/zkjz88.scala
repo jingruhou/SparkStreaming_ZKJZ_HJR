@@ -8,12 +8,12 @@ import org.apache.spark.{SparkContext, SparkConf}
 object zkjz88 {
   def main(args:Array[String]): Unit ={
     //初始化配置
-    val conf = new SparkConf().setAppName("zkjz_hjr")
+    val conf = new SparkConf().setAppName("check_zkjz_hjr")
     val sc = new SparkContext(conf)
 
     //加载文件
-    val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/word/p*")
-    val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.11:8020/user/hive/warehouse/words/words")
+    val outclinical_diago_rdd = sc.textFile("hdfs://10.2.8.12:8020/user/hive/warehouse/word/p*")
+    val outclinical_words_rdd = sc.textFile("hdfs://10.2.8.12:8020/user/hive/warehouse/words/words")
 
     //将词库表转化为数组
     val counts_word = outclinical_words_rdd.toArray()
@@ -34,24 +34,24 @@ object zkjz88 {
         * 处理门诊表的每一行数据
         */
       var strs = line.split("\001")
-      var l = strs(3)//(门诊表业务逻辑---1)拿出第四个字段（DIAG_NAME）
+      var l = strs(3)
       var firstline = strs(0)+"\001"+strs(1)+"\001"+strs(2)+"\001"//（门诊表业务逻辑---2）拿出前三个字段
       var lastline = ""
       var s = line
-      var m = l.length//（门诊表业务逻辑--3）拿出第四个字段的长度
-      while (m >= 1) {//第四个字段---诊断名不能为空（DIAG_NAME的长度必须>=1）
+      var m = l.length
+      while (m >= 1) {
         var j = 0
         while (j < l.length - m + 1) {
           var s3 = l.substring(j, j + m)
-          if (map.contains(s3)) {//去Map里面查找有没有第四个字段
+          if (map.contains(s3)) {
             //s=s.replace(s3,map(s3)+" ")
-            lastline += map(s3)+","//检查出Map里面包含了第四个字段（用词库里面的name1,name2,name3...）
-            l = l.replace(s3,"")//将第四个字段替换为空
+            lastline += map(s3)+","
+            l = l.replace(s3,"")
           }
           j = j + 1
-        }//一层循环---（先是1234对应找，然后234，对应找；再就是34对应找...）
+        }
         m = m - 1
-      }//二层循环---(先是123对应找，然后23，对应找；再就是3对应找...)
+      }
       firstline+lastline
     })
     /**
@@ -92,13 +92,17 @@ object zkjz88 {
 
       var lastline = ""
       for(i <- 0 to codeline.length-1){
-        lastline += firstline+codeline(i)+"\n"
+        if(i == codeline.length-1){
+          lastline += firstline+codeline(i)
+        }
+        else
+          lastline += firstline+codeline(i)+"\n"
       }
       lastline
-    }).filter(_.split("\n")!=null)
+    })
 
     //写入hdfs
-    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.11:8020/user/hive/warehouse/hjr/results")
+    codes.repartition(1).saveAsTextFile("hdfs://10.2.8.12:8020/user/hive/warehouse/hjr/splitNullResults")
     //关服务
     sc.stop()
   }

@@ -1,0 +1,1 @@
+./spark-submit  --master spark://sparker001:7077 --class zkjz.hjr.SQL.zkjz6 --executor-memory  100G /home/sparker/001.jar

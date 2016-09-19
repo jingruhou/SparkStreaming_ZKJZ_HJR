@@ -45,6 +45,7 @@ object zkjz88 {
          //2016-09-19 hjr  注释scala里的substring()方法
          //String substring(int beginIndex, int endIndex)
          //返回一个新字符串，它是此字符串的一个子字符串。
+         //substring(int beginIndex, int endIndex)索引从0开始，截取的子字符串不包括endIndex
           var s3 = l.substring(j, j + m)
           if (map.contains(s3)) {
             //s=s.replace(s3,map(s3)+" ")
